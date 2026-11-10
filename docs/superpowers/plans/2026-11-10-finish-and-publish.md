@@ -15,15 +15,16 @@
 - All Python commands use `.venv\Scripts\python.exe` (the system `python` is 3.12.7 without Flask; the dependencies live in the venv).
 - Server binds `127.0.0.1:5000` only.
 - Tests must be green before every commit.
+- Run every command from the repository root (all paths below are relative).
 - Commit messages: English, area prefix (`docs:`, `web:`, `tests:`), per `AGENTS.md`.
 - Repository: public, named `transistor-simulator`.
-- Do not modify `dc_bias.py`, `app.py`, `templates/`, `static/`, `tests/`, `README.md`, `AGENTS.md` or existing `docs/*.md`.
+- Do not modify `dc_bias.py`, `app.py`, `templates/`, `static/`, `tests/`, `AGENTS.md` or existing `docs/*.md`. `README.md` may only be corrected where it misstates the repository (e.g. the test counts).
 - Do not commit `.venv/` or `__pycache__/`.
 
 ## Review Focus
 
 1. **`winget` in a non-interactive shell** — an unaccepted source agreement makes the install abort with a prompt error instead of installing; every `winget` call must pass the acceptance flags and be checked for exit code 0.
-2. **Stale PATH after install** — `git`/`gh` may be missing from the current shell even though installed; Task 1 verifies in a fresh shell and falls back to an explicit PATH entry.
+2. **Stale PATH after install** — `git`/`gh` may be missing from the current shell even though installed; Task 1 Step 4 prepends the real install directories for the session.
 3. **Wrong interpreter** — running `python` instead of `.venv\Scripts\python.exe` gives `ModuleNotFoundError: flask`; every Task 2/4/6 command uses the venv path.
 4. **Port 5000 already in use** — the demo can silently hit another process; Task 4 confirms the response contains this app's form before trusting any result, and frees the port afterwards.
 5. **Thai text through PowerShell** — console encoding can mangle Thai assertions; Task 4 checks status codes and ASCII values first and only then the Thai error text.
@@ -91,7 +92,7 @@ Run:
 ```powershell
 git status --short
 ```
-Expected: no output.
+Expected: no output, or only `?? docs/superpowers/` before Task 3 commits it.
 
 - [x] **Step 2: Confirm the existing history**
 

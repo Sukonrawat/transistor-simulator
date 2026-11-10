@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="ENG29 2121 Lab 02 — Flask web app คำนวณ DC bias ของวงจรขยาย NPN Common Emitter แบบ Voltage-Divider Bias">
+<title>BJT DC Bias Web App · ENG29 2121 Lab 02</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <p class="eyebrow">ENG29 2121 · COMPUTER PROGRAMMING FOR ELECTRICAL ENGINEERS · LAB 02</p>
+    <h1>BJT DC Bias Web App</h1>
+    <p class="sub">วงจรขยาย NPN Common Emitter แบบ Voltage-Divider Bias — จุดทำงาน DC คำนวณด้วย Python Backend (Flask) ไม่ใช่ค่าที่เขียนค้างใน HTML</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+{% if error_messages %}
+<section class="alert alert-error" role="alert">
+  <h2>พบข้อผิดพลาดในข้อมูลที่กรอก</h2>
+  <ul>
+    {% for message in error_messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  <p class="hint">แก้ค่าในฟอร์มด้านล่างแล้วกดคำนวณใหม่ได้เลย — หน้าเว็บยังทำงานตามปกติ</p>
+</section>
+{% endif %}
+
+<section class="panel">
+  <h2><span class="stepno">1</span> กรอกค่าวงจร</h2>
+  <form method="post" action="{{ url_for('calculate') }}" class="bias-form" id="bias-form">
+    <div class="field">
+      <label for="vcc">VCC — แรงดันจ่าย <span class="unit">[V]</span></label>
+      <input type="text" inputmode="decimal" id="vcc" name="vcc" value="{{ form_values.vcc }}" autocomplete="off" required>
+    </div>
+    <div class="field">
+      <label for="r1">R1 — ตัวต้านทาน VCC→Base <span class="unit">[Ω]</span></label>
+      <input type="text" inputmode="decimal" id="r1" name="r1" value="{{ form_values.r1 }}" autocomplete="off" required>
+    </div>
+    <div class="field">
+      <label for="r2">R2 — ตัวต้านทาน Base→GND <span class="unit">[Ω]</span></label>
+      <input type="text" inputmode="decimal" id="r2" name="r2" value="{{ form_values.r2 }}" autocomplete="off" required>
+    </div>
+    <div class="field">
+      <label for="rc">RC — ตัวต้านทาน VCC→Collector <span class="unit">[Ω]</span></label>
+      <input type="text" inputmode="decimal" id="rc" name="rc" value="{{ form_values.rc }}" autocomplete="off" required>
+    </div>
+    <div class="field">
+      <label for="re">RE — ตัวต้านทาน Emitter→GND <span class="unit">[Ω]</span></label>
+      <input type="text" inputmode="decimal" id="re" name="re" value="{{ form_values.re }}" autocomplete="off" required>
+    </div>
+    <div class="field">
+      <label for="beta">β (beta) — อัตราขยายกระแส <span class="unit">[-]</span></label>
+      <input type="text" inputmode="decimal" id="beta" name="beta" value="{{ form_values.beta }}" autocomplete="off" required>
+    </div>
+    <div class="field">
+      <label for="vbe">VBE — แรงดัน Base-Emitter <span class="unit">[V]</span></label>
+      <input type="text" inputmode="decimal" id="vbe" name="vbe" value="{{ form_values.vbe }}" autocomplete="off" required>
+    </div>
+    <div class="field field-submit">
+      <button type="submit">คำนวณ DC Bias (Calculate)</button>
+    </div>
+  </form>
+  <p class="hint">หน่วยที่รับ: VCC และ VBE เป็นโวลต์ (V) · R1, R2, RC, RE เป็นโอห์ม (Ω) เช่น 2.2 kΩ = 2200 · β ไม่มีหน่วย — ค่าที่ตั้งไว้ในฟอร์มคือชุดข้อมูลอ้างอิงจากใบ Lab</p>
+</section>
+
+<section class="panel">
+  <h2><span class="stepno">2</span> แผนผังวงจร</h2>
+  <figure class="schematic">
+    <svg viewBox="0 0 340 285" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="sch-title">
+      <title id="sch-title">วงจรขยาย NPN Common Emitter แบบ Voltage-Divider Bias</title>
+      <defs>
+        <marker id="npn-arrow" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 Z" fill="#17344b"></path>
+        </marker>
+      </defs>
+      <!-- supply rail -->
+      <text x="172" y="20" text-anchor="middle" class="sch-text">VCC</text>
+      <circle cx="172" cy="32" r="4" class="sch-terminal"></circle>
+      <line x1="172" y1="36" x2="172" y2="48" class="sch-wire"></line>
+      <line x1="140" y1="48" x2="204" y2="48" class="sch-wire"></line>
+      <!-- R1 (VCC to base) -->
+      <line x1="140" y1="48" x2="140" y2="74" class="sch-wire"></line>
+      <rect x="134" y="74" width="12" height="42" class="sch-box"></rect>
+      <line x1="140" y1="116" x2="140" y2="150" class="sch-wire"></line>
+      <text x="126" y="98" text-anchor="end" class="sch-text">R1</text>
+      <!-- R2 (base to ground) -->
+      <line x1="140" y1="150" x2="140" y2="178" class="sch-wire"></line>
+      <rect x="134" y="178" width="12" height="42" class="sch-box"></rect>
+      <line x1="140" y1="220" x2="140" y2="252" class="sch-wire"></line>
+      <text x="126" y="202" text-anchor="end" class="sch-text">R2</text>
+      <!-- ground under R2 -->
+      <line x1="128" y1="252" x2="152" y2="252" class="sch-wire"></line>
+      <line x1="133" y1="257" x2="147" y2="257" class="sch-wire"></line>
+      <line x1="138" y1="262" x2="142" y2="262" class="sch-wire"></line>
+      <!-- RC (VCC to collector) -->
+      <line x1="204" y1="48" x2="204" y2="72" class="sch-wire"></line>
+      <rect x="198" y="72" width="12" height="42" class="sch-box"></rect>
+      <line x1="204" y1="114" x2="204" y2="128" class="sch-wire"></line>
+      <text x="216" y="96" class="sch-text">RC</text>
+      <!-- RE (emitter to ground) -->
+      <line x1="204" y1="172" x2="204" y2="192" class="sch-wire"></line>
+      <rect x="198" y="192" width="12" height="42" class="sch-box"></rect>
+      <line x1="204" y1="234" x2="204" y2="256" class="sch-wire"></line>
+      <text x="216" y="216" class="sch-text">RE</text>
+      <!-- ground under RE -->
+      <line x1="192" y1="256" x2="216" y2="256" class="sch-wire"></line>
+      <line x1="197" y1="261" x2="211" y2="261" class="sch-wire"></line>
+      <line x1="202" y1="266" x2="206" y2="266" class="sch-wire"></line>
+      <!-- NPN transistor -->
+      <circle cx="196" cy="150" r="27" class="sch-trans"></circle>
+      <line x1="188" y1="134" x2="188" y2="166" class="sch-bar"></line>
+      <line x1="140" y1="150" x2="188" y2="150" class="sch-wire"></line>
+      <line x1="188" y1="142" x2="204" y2="128" class="sch-wire"></line>
+      <line x1="188" y1="158" x2="204" y2="172" class="sch-wire" marker-end="url(#npn-arrow)"></line>
+      <text x="234" y="154" class="sch-text sch-muted">NPN</text>
+      <!-- node dots and voltage labels -->
+      <circle cx="140" cy="150" r="3.5" class="sch-dot"></circle>
+      <text x="126" y="142" text-anchor="end" class="sch-text">VB</text>
+      <circle cx="204" cy="128" r="3.5" class="sch-dot"></circle>
+      <text x="216" y="124" class="sch-text">VC</text>
+      <circle cx="204" cy="172" r="3.5" class="sch-dot"></circle>
+      <text x="216" y="182" class="sch-text">VE</text>
+      <circle cx="140" cy="48" r="3.5" class="sch-dot"></circle>
+      <circle cx="204" cy="48" r="3.5" class="sch-dot"></circle>
+    </svg>
+    <figcaption>วงจรขยาย NPN Common Emitter แบบ Voltage-Divider Bias · R1: VCC→Base, R2: Base→GND, RC: VCC→Collector, RE: Emitter→GND (ลูกศรที่อิมิตเตอร์ชี้ออก = NPN)</figcaption>
+  </figure>
+</section>
+
+{% if result %}
+<section class="panel">
+  <h2><span class="stepno">3</span> ผลการคำนวณ DC Bias</h2>
+  <p class="region-line">Operating region:
+    {% if result.region == 'forward-active' %}
+      <span class="badge badge-ok">Forward-Active</span>
+      <span class="muted">— ผลสอดคล้องกับสมมติฐานของแบบจำลอง (β, VBE คงที่)</span>
+    {% elif result.region == 'cutoff' %}
+      <span class="badge badge-cutoff">Cutoff</span>
+      <span class="muted">— ทรานซิสเตอร์ไม่นำกระแส อยู่นอกสมมติฐาน Forward-Active</span>
+    {% else %}
+      <span class="badge badge-sat">Saturation</span>
+      <span class="muted">— ทรานซิสเตอร์อิ่มตัว อยู่นอกสมมติฐาน Forward-Active</span>
+    {% endif %}
+  </p>
+
+  {% for w in result.warnings %}
+  <div class="alert alert-warn">{{ w }}</div>
+  {% endfor %}
+
+  {% if not result.approximation_valid %}
+  <div class="alert alert-warn">ค่าในตารางด้านล่างอยู่นอกสมมติฐาน Forward-Active จึงไม่ควรนำไปใช้เป็นจุดทำงานจริงโดยไม่ตรวจสอบเพิ่มเติม</div>
+  {% endif %}
+
+  <div class="scroll">
+  <table class="results">
+    <thead><tr><th>ปริมาณ</th><th>สัญลักษณ์</th><th>ค่า</th><th>หน่วย</th></tr></thead>
+    <tbody>
+      <tr><td>แรงดันที่ฐาน</td><td>V<sub>B</sub></td><td class="num">{{ "%.3f"|format(result.vb) }}</td><td>V</td></tr>
+      <tr><td>แรงดันที่อิมิตเตอร์</td><td>V<sub>E</sub></td><td class="num">{{ "%.3f"|format(result.ve) }}</td><td>V</td></tr>
+      <tr><td>แรงดันที่คอลเลกเตอร์</td><td>V<sub>C</sub></td><td class="num">{{ "%.3f"|format(result.vc) }}</td><td>V</td></tr>
+      <tr><td>แรงดันคอลเลกเตอร์–อิมิตเตอร์</td><td>V<sub>CE</sub></td><td class="num">{{ "%.3f"|format(result.vce) }}</td><td>V</td></tr>
+      <tr><td>กระแสคอลเลกเตอร์</td><td>I<sub>C</sub></td><td class="num">{{ "%.3f"|format(result.ic_ma) }}</td><td>mA</td></tr>
+      <tr><td>กระแสอิมิตเตอร์</td><td>I<sub>E</sub></td><td class="num">{{ "%.3f"|format(result.ie_ma) }}</td><td>mA</td></tr>
+      <tr><td>กระแสที่ฐาน</td><td>I<sub>B</sub></td><td class="num">{{ "%.2f"|format(result.ib_ua) }}</td><td>µA</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <details class="method">
+    <summary>ดูวิธีคำนวณ ค่าอินพุต และสมมติฐานของแบบจำลอง</summary>
+    <h3>ค่าอินพุตที่ใช้คำนวณ</h3>
+    <ul>
+      <li>VCC = {{ "%.2f"|format(result.vcc) }} V, VBE = {{ "%.2f"|format(result.vbe) }} V, β = {{ "%.0f"|format(result.beta) }}</li>
+      <li>R1 = {{ "%.0f"|format(result.r1) }} Ω ({{ "%.1f"|format(result.r1 / 1000) }} kΩ), R2 = {{ "%.0f"|format(result.r2) }} Ω ({{ "%.1f"|format(result.r2 / 1000) }} kΩ)</li>
+      <li>RC = {{ "%.0f"|format(result.rc) }} Ω ({{ "%.1f"|format(result.rc / 1000) }} kΩ), RE = {{ "%.0f"|format(result.re) }} Ω ({{ "%.1f"|format(result.re / 1000) }} kΩ)</li>
+    </ul>
+    <h3>ขั้นตอนการคำนวณ (Forward-Active Approximation)</h3>
+    <ol>
+      <li>V<sub>TH</sub> = VCC × R2/(R1+R2) = {{ "%.4f"|format(result.vth) }} V</li>
+      <li>R<sub>TH</sub> = R1·R2/(R1+R2) = {{ "%.1f"|format(result.rth) }} Ω</li>
+      <li>I<sub>B</sub> = (V<sub>TH</sub>−V<sub>BE</sub>)/(R<sub>TH</sub>+(β+1)·R<sub>E</sub>) = {{ "%.4e"|format(result.ib) }} A</li>
+      <li>I<sub>C</sub> = β·I<sub>B</sub> = {{ "%.4e"|format(result.ic) }} A, I<sub>E</sub> = (β+1)·I<sub>B</sub> = {{ "%.4e"|format(result.ie) }} A</li>
+      <li>V<sub>E</sub> = I<sub>E</sub>·R<sub>E</sub>, V<sub>B</sub> = V<sub>E</sub>+V<sub>BE</sub>, V<sub>C</sub> = VCC−I<sub>C</sub>·R<sub>C</sub>, V<sub>CE</sub> = V<sub>C</sub>−V<sub>E</sub></li>
+    </ol>
+    <h3>สมมติฐานและข้อจำกัด</h3>
+    <ul>
+      <li>ทรานซิสเตอร์ NPN ในสภาวะ Forward-Active: ถือว่า β คงที่และ V<sub>BE</sub> คงที่ตามค่าที่กรอก</li>
+      <li>เกณฑ์ตรวจภูมิภาค: Cutoff เมื่อ V<sub>TH</sub> ≤ V<sub>BE</sub> · Saturation เมื่อ V<sub>CE</sub> &lt; 0.2 V (ค่า VCE(sat) โดยประมาณ)</li>
+      <li>ไม่ใช่ SPICE: ไม่มี Early effect, ความเสียภาษีของสภาวะอิ่มตัวจริง หรือพารามิเตอร์ไบอัสที่ไม่เชิงเส้น — ผลที่อยู่นอก Active Region จึงแสดงพร้อมคำเตือนเสมอ</li>
+    </ul>
+  </details>
+</section>
+{% endif %}
+
+</main>
+
+<footer>
+  ENG29 2121 · Lab 02 · BJT DC Bias Web App · Flask + Python · ค่าที่แสดงเป็นผลจากแบบจำลอง Forward-Active ตามสมมติฐานที่ระบุไว้
+</footer>
+
+</body>
+</html>

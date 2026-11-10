@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments (never commit dependencies)
+.venv/
+venv/
+env/
+
+# Local secrets / environment (never commit credentials)
+.env
+*.key
+
+# Flask instance folder
+instance/
+
+# OS noise
+.DS_Store
+Thumbs.db

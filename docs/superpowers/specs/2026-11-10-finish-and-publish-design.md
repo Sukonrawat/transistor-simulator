@@ -8,9 +8,9 @@
 
 The Lab 02 web app already exists and passes its tests. What is missing is the
 delivery: the code lives in a local repository that has never been pushed, and
-the machine cannot even make a commit. This work finishes the assignment by
-publishing the existing, verified application to GitHub and demonstrating it
-running on localhost today.
+`git` is not on the PATH this session inherits. This work finishes the
+assignment by publishing the existing, verified application to GitHub and
+demonstrating it running on localhost today.
 
 No application behaviour changes.
 
@@ -18,13 +18,16 @@ No application behaviour changes.
 
 - `dc_bias.py`, `app.py`, `templates/index.html`, `static/style.css`,
   `tests/` (18 tests), `docs/` including 5 screenshots.
-- `python -m unittest discover -s tests -v` → **18 tests OK**.
+- `.venv\Scripts\python.exe -m unittest discover -s tests -v` → **18 tests OK**
+  (10 engineering + 8 HTTP).
 - 5 commits on `main`, HEAD `66fba92`, working tree clean.
-- `git` is not installed on the machine; `.git/config` has no remote.
+- `git --version` fails in this shell: Git 2.56 is installed under
+  `%LOCALAPPDATA%\Programs\Git` but is absent from the inherited PATH.
+  `.git/config` has no remote.
 
 ## 3 · Goals
 
-1. Git and the GitHub CLI installed and usable.
+1. Git and the GitHub CLI usable from this session.
 2. Public GitHub repository `transistor-simulator` containing the 5 existing
    commits plus one commit for this design and its implementation plan.
 3. The app verified end-to-end over HTTP on `127.0.0.1:5000`.
@@ -46,7 +49,8 @@ No application behaviour changes.
 ## 6 · Constraints
 
 - Python 3.10+; every command runs through `.venv\Scripts\python.exe`, because
-  the system `python` on PATH is 3.14 while the dependencies live in the 3.12 venv.
+  the system `python` (3.12.7) does not have Flask installed while the
+  dependencies live in the 3.12 venv.
 - The server binds `127.0.0.1:5000` only — never a public interface.
 - A green test run precedes every commit (`AGENTS.md`).
 - Commit messages are English, prefixed by area (`docs:`, `web:`, …).
@@ -69,19 +73,19 @@ Both reach the same end state; A removes the only manual step.
 - **New documents:** `docs/superpowers/specs/` and `docs/superpowers/plans/`,
   written in English. User-facing material (UI, README, `AGENTS.md`, other
   `docs/`) stays Thai and is not touched.
-- **Authentication:** via `gh auth login` in the user's own terminal. The agent
-  cannot complete an interactive browser login inside a tool call.
+- **Authentication:** `gh auth login --web` run from the agent's shell, with
+  the one-time code handed to the user to authorise in their browser.
 
 ## 9 · Definition of done
 
 - `git --version` and `gh --version` succeed.
-- `python -m unittest discover -s tests -v` → 18 tests OK.
+- `.venv\Scripts\python.exe -m unittest discover -s tests -v` → 18 tests OK.
 - `GET http://127.0.0.1:5000/` → 200 with the seven input fields.
 - Reference submission → 200 showing VB 1.942 V, VE 1.242 V, VC 9.294 V,
   VCE 8.052 V, IC 1.230 mA, badge Forward-Active.
-- `RC = -5` → 400 with a Thai message naming RC, page intact.
-- `git status` clean; `origin` points at GitHub; repository is public and shows
-  all commits.
+- `RC = -5` → 400 with a Thai message naming RC, form still rendered.
+- `git status` clean; `origin` points at GitHub; `origin/main` equals `HEAD`;
+  repository is public.
 
 ## 10 · Left to the builder
 

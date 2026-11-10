@@ -40,7 +40,7 @@ python -m flask --app app run --debug
 python -m unittest discover -s tests -v
 ```
 
-ผลที่คาดหวัง: **18 tests OK** — 9 unit tests วิศวกรรม (`tests/test_dc_bias.py`) + 9 HTTP tests ผ่าน Flask test client (`tests/test_web.py`)
+ผลที่คาดหวัง: **18 tests OK** — 10 unit tests วิศวกรรม (`tests/test_dc_bias.py`) + 8 HTTP tests ผ่าน Flask test client (`tests/test_web.py`)
 
 ## 3 · โครงสร้างโปรเจกต์
 
@@ -62,7 +62,9 @@ transistor-simulator/
     ├── design-note.md      # สิ่งที่ตัดสินใจออกแบบและเหตุผล
     ├── validation.md       # การคำนวณอิสระและการตรวจรับ
     ├── reflection.md       # สะท้อนคิดหลังจบ Lab
-    └── screenshots/         # ภาพหน้าจอหลักฐานการทำงาน
+    ├── test-log.txt        # บันทึกผลการรัน test
+    ├── screenshots/         # ภาพหน้าจอหลักฐานการทำงาน
+    └── superpowers/        # design + implementation plan ของงานนี้
 ```
 
 **ความรับผิดชอบแยกส่วน (Separation of concerns)**
@@ -104,7 +106,7 @@ VC  = VCC−IC·RC     VCE = VC−VE
 | A3 | ผลตรงกับการคำนวณอิสระ | ✅ | `tests/test_dc_bias.py::ReferenceCircuitTest` (ค่า expected คำนวณมือก่อนรันโค้ด) + `docs/validation.md` |
 | A4 | อินพุตไม่ถูกต้องแสดง Error, หน้าไม่ล้ม | ✅ | `test_a4_negative_resistor_shows_clear_error`, `test_a4_non_numeric_and_missing_shows_clear_error` + `04_validation_error.png` |
 | A5 | นอก Active Region แสดง Warning | ✅ | `test_a5_cutoff_case_shows_warning`, `test_a5_saturation_case_shows_warning` + `03_cutoff_warning.png`, `05_saturation_warning.png` |
-| A6 | ≥3 engineering tests + ≥1 Flask test client test | ✅ | 18 tests รวม (9 engineering + 9 HTTP) |
+| A6 | ≥3 engineering tests + ≥1 Flask test client test | ✅ | 18 tests รวม (10 engineering + 8 HTTP) |
 | A7 | Clone แล้วรันตาม README ได้ | ✅ | ทำตามข้อ 1–2 ของไฟล์นี้ |
 
 ## 6 · เดโมสั้น ๆ (Minimum Demo)

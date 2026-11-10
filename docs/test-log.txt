@@ -1,0 +1,24 @@
+test_negative_vbe_is_rejected (test_dc_bias.InputValidationTest.test_negative_vbe_is_rejected) ... ok
+test_non_positive_values_are_rejected (test_dc_bias.InputValidationTest.test_non_positive_values_are_rejected) ... ok
+test_parse_form_accepts_the_reference_circuit (test_dc_bias.InputValidationTest.test_parse_form_accepts_the_reference_circuit) ... ok
+test_parse_form_rejects_non_finite_values (test_dc_bias.InputValidationTest.test_parse_form_rejects_non_finite_values) ... ok
+test_parse_form_rejects_non_numeric_and_missing_fields (test_dc_bias.InputValidationTest.test_parse_form_rejects_non_numeric_and_missing_fields) ... ok
+test_internal_consistency_of_the_model (test_dc_bias.ReferenceCircuitTest.test_internal_consistency_of_the_model)
+KCL / KVL identities that must hold for any valid solution. ... ok
+test_reference_operating_point (test_dc_bias.ReferenceCircuitTest.test_reference_operating_point) ... ok
+test_cutoff_when_vth_below_vbe (test_dc_bias.RegionAndWarningTest.test_cutoff_when_vth_below_vbe) ... ok
+test_near_saturation_still_active_but_warned (test_dc_bias.RegionAndWarningTest.test_near_saturation_still_active_but_warned) ... ok
+test_saturation_when_vce_below_threshold (test_dc_bias.RegionAndWarningTest.test_saturation_when_vce_below_threshold) ... ok
+test_a1_get_index_shows_the_input_form (test_web.WebAppTest.test_a1_get_index_shows_the_input_form) ... ok
+test_a2_post_calculate_returns_backend_results (test_web.WebAppTest.test_a2_post_calculate_returns_backend_results) ... ok
+test_a2_results_change_with_the_input (test_web.WebAppTest.test_a2_results_change_with_the_input) ... ok
+test_a3_post_root_route_behaves_like_calculate (test_web.WebAppTest.test_a3_post_root_route_behaves_like_calculate) ... ok
+test_a4_negative_resistor_shows_clear_error (test_web.WebAppTest.test_a4_negative_resistor_shows_clear_error) ... ok
+test_a4_non_numeric_and_missing_shows_clear_error (test_web.WebAppTest.test_a4_non_numeric_and_missing_shows_clear_error) ... ok
+test_a5_cutoff_case_shows_warning (test_web.WebAppTest.test_a5_cutoff_case_shows_warning) ... ok
+test_a5_saturation_case_shows_warning (test_web.WebAppTest.test_a5_saturation_case_shows_warning) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.040s
+
+OK
